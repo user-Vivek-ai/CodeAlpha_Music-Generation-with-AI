@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 Tollywood AI Music Maker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1a0030 0%, #0d001a 50%, #001020 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 28px 20px 16px;
+  background: linear-gradient(180deg, rgba(255,140,0,0.12) 0%, transparent 100%);
+  border-bottom: 2px solid #ff8c00;
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ff8c00;
+  text-shadow: 0 0 20px rgba(255,140,0,0.5);
+  letter-spacing: 1px;
+}
+.header p { font-size: 14px; color: #aaa; margin-top: 4px; }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── CARD ── */
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,140,0,0.25);
+  border-radius: 14px;
+  padding: 20px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ff8c00;
+  margin-bottom: 14px;
+}
+
+/* ── SELECTS & INPUTS ── */
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+select {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,140,0,0.3);
+  color: #fff;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23ff8c00'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+select:focus { border-color: #ff8c00; }
+
+/* ── MOOD BUTTONS ── */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.mood-btn {
+  padding: 10px 6px;
+  border: 2px solid rgba(255,140,0,0.2);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.3);
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.mood-btn .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.mood-btn:hover { border-color: #ff8c00; color: #fff; }
+.mood-btn.active {
+  border-color: #ff8c00;
+  background: rgba(255,140,0,0.15);
+  color: #ff8c00;
+  box-shadow: 0 0 12px rgba(255,140,0,0.3);
+}
+
+/* ── SPEED SLIDER ── */
+.speed-wrap { margin-top: 4px; }
+.speed-track {
+  position: relative;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 10px 0 4px;
+}
+.speed-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff8c00, #ffcc00);
+  border-radius: 3px;
+  width: 50%;
+  pointer-events: none;
+}
+input[type=range].speed-input {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  width: 100%;
+  height: 6px;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+}
+.speed-labels { display: flex; justify-content: space-between; font-size: 10px; color: #777; }
+
+/* ── BIG GENERATE BUTTON ── */
+.btn-generate {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff8c00, #e65c00);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(255,140,0,0.4);
+}
+.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,140,0,0.5); }
+.btn-generate:active { transform: translateY(0); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── VISUALIZER ── */
+.viz-wrap {
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.4);
+  margin-bottom: 14px;
+}
+#vizCanvas { width: 100%; height: 100%; display: block; }
+
+/* ── TRANSPORT ── */
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn-play {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #e65c00);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(255,140,0,0.4);
+  transition: all 0.15s;
+}
+.btn-play:hover { transform: scale(1.05); }
+.btn-play:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-stop {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,140,0,0.4);
+  background: transparent;
+  color: #ff8c00;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.btn-stop:hover { background: rgba(255,140,0,0.15); }
+.btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.progress-area { flex: 1; }
+.progress-top { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 6px; }
+.progress-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+}
+#progFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff8c00, #ffcc00);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.15s linear;
+}
+
+/* ── STATUS ── */
+.status {
+  text-align: center;
+  font-size: 13px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-style: italic;
+}
+.status.ok    { color: #4ade80; border-color: rgba(74,222,128,0.2); }
+.status.busy  { color: #ff8c00; border-color: rgba(255,140,0,0.2); }
+.status.play  { color: #60a5fa; border-color: rgba(96,165,250,0.2); }
+
+/* ── NOTES DISPLAY ── */
+.notes-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.note-chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,140,0,0.2);
+  background: rgba(0,0,0,0.3);
+  color: #ccc;
+  transition: all 0.1s;
+}
+.note-chip.lit {
+  background: rgba(255,140,0,0.3);
+  border-color: #ff8c00;
+  color: #ff8c00;
+}
+
+/* ── DOWNLOAD BUTTONS ── */
+.dl-row { display: flex; gap: 10px; }
+.btn-dl {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid rgba(255,140,0,0.3);
+  border-radius: 10px;
+  background: transparent;
+  color: #ff8c00;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn-dl:hover { background: rgba(255,140,0,0.1); border-color: #ff8c00; }
+.btn-dl:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── STEP DOTS ── */
+.steps { display: flex; gap: 8px; justify-content: center; margin-bottom: 6px; }
+.step-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  transition: all 0.2s;
+}
+.step-dot.done { background: #4ade80; }
+.step-dot.active { background: #ff8c00; box-shadow: 0 0 8px #ff8c00; }
+
+@media (max-width: 600px) {
+  .row3 { grid-template-columns: 1fr 1fr; }
+  .mood-grid { grid-template-columns: repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎬 Tollywood AI Music Maker</h1>
+  <p>Generate Telugu film-style music in seconds with AI</p>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1: MOOD -->
+  <div class="card">
+    <div class="card-title">Step 1 — Pick the Mood 🎭</div>
+    <div class="mood-grid">
+      <div class="mood-btn active" data-mood="love" onclick="pickMood(this)">
+        <span class="emoji">💕</span>Love Scene
+      </div>
+      <div class="mood-btn" data-mood="action" onclick="pickMood(this)">
+        <span class="emoji">⚔️</span>Action
+      </div>
+      <div class="mood-btn" data-mood="sad" onclick="pickMood(this)">
+        <span class="emoji">😢</span>Sad / Emotional
+      </div>
+      <div class="mood-btn" data-mood="celebration" onclick="pickMood(this)">
+        <span class="emoji">🎉</span>Celebration
+      </div>
+      <div class="mood-btn" data-mood="devotional" onclick="pickMood(this)">
+        <span class="emoji">🙏</span>Devotional
+      </div>
+      <div class="mood-btn" data-mood="comedy" onclick="pickMood(this)">
+        <span class="emoji">😂</span>Comedy
+      </div>
+      <div class="mood-btn" data-mood="suspense" onclick="pickMood(this)">
+        <span class="emoji">👀</span>Suspense
+      </div>
+      <div class="mood-btn" data-mood="folk" onclick="pickMood(this)">
+        <span class="emoji">🥁</span>Folk / Janapada
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: SETTINGS -->
+  <div class="card">
+    <div class="card-title">Step 2 — Settings 🎛️</div>
+    <div class="row3" style="margin-bottom:14px;">
+      <div class="field">
+        <label>Raaga / Scale</label>
+        <select id="raaga">
+          <option value="shankarabharanam">Shankarabharanam</option>
+          <option value="kalyani">Kalyani</option>
+          <option value="kharaharapriya" selected>Kharaharapriya</option>
+          <option value="bhairavi">Bhairavi</option>
+          <option value="hamsadhwani">Hamsadhwani</option>
+          <option value="mohanam">Mohanam</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Instrument</label>
+        <select id="instrument">
+          <option value="veena">Veena</option>
+          <option value="flute" selected>Flute</option>
+          <option value="sitar">Sitar / Strings</option>
+          <option value="piano">Piano</option>
+          <option value="synth">Synth / Modern</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Length</label>
+        <select id="length">
+          <option value="8">Short (8 notes)</option>
+          <option value="16" selected>Medium (16 notes)</option>
+          <option value="32">Long (32 notes)</option>
+          <option value="48">Very Long (48 notes)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field speed-wrap">
+      <label>Speed / Tempo</label>
+      <div class="speed-track">
+        <div class="speed-fill" id="speedFill"></div>
+        <input type="range" class="speed-input" id="speedSlider"
+               min="60" max="180" value="100"
+               oninput="updateSpeed(this.value)">
+      </div>
+      <div class="speed-labels">
+        <span>🐢 Slow (60)</span>
+        <span id="speedLabel" style="color:#ff8c00;font-weight:700;">100 BPM</span>
+        <span>⚡ Fast (180)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <button class="btn-generate" id="generateBtn" onclick="generateMusic()">
+    🎵 Generate Tollywood Music
+  </button>
+
+  <!-- PLAYER -->
+  <div class="card">
+    <div class="card-title">🎧 Player</div>
+
+    <!-- step indicators -->
+    <div class="steps">
+      <div class="step-dot" id="dot0" title="Building scale"></div>
+      <div class="step-dot" id="dot1" title="LSTM generating"></div>
+      <div class="step-dot" id="dot2" title="Making melody"></div>
+      <div class="step-dot" id="dot3" title="Ready to play"></div>
+    </div>
+
+    <div id="statusBox" class="status">Generate a melody first! 👆</div>
+
+    <div class="viz-wrap" style="margin-top:12px;">
+      <canvas id="vizCanvas"></canvas>
+    </div>
+
+    <div class="transport">
+      <button class="btn-play" id="playBtn" onclick="togglePlay()" disabled>▶</button>
+      <button class="btn-stop" id="stopBtn" onclick="hardStop()" disabled>■</button>
+      <div class="progress-area">
+        <div class="progress-top">
+          <span id="timeNow">0:00</span>
+          <span id="timeTotal">0:00</span>
+        </div>
+        <div class="progress-bar" onclick="seekProgress(event)">
+          <div id="progFill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="card" id="notesCard" style="display:none;">
+    <div class="card-title">🎼 Generated Notes</div>
+    <div class="notes-row" id="notesRow"></div>
+  </div>
+
+  <!-- DOWNLOADS -->
+  <div class="card" id="dlCard" style="display:none;">
+    <div class="card-title">💾 Save Your Music</div>
+    <div class="dl-row">
+      <button class="btn-dl" id="midiBtn" onclick="downloadMIDI()">⬇️ Download MIDI</button>
+      <button class="btn-dl" id="wavBtn" onclick="downloadWAV()">⬇️ Download WAV</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tone.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+//  TOLLYWOOD RAAGAS  (swara frequencies in Hz)
+// ══════════════════════════════════════════════════
+const RAAGA_INTERVALS = {
+  shankarabharanam: [0,2,4,5,7,9,11],   // Bilawal / Major
+  kalyani:          [0,2,4,6,7,9,11],   // Kalyan / Lydian
+  kharaharapriya:   [0,2,3,5,7,9,10],   // Kafi / Dorian
+  bhairavi:         [0,2,3,5,7,8,10],   // Natural Minor
+  hamsadhwani:      [0,2,4,7,11],       // Pentatonic-ish
+  mohanam:          [0,2,4,7,9],        // Pentatonic Major
+};
+
+// Mood → rhythmic feel & dynamics
+const MOOD_CONFIG = {
+  love:        { bpmMult:0.85, velMin:0.4, velMax:0.7, swing:0.15, octave:5 },
+  action:      { bpmMult:1.3,  velMin:0.7, velMax:1.0, swing:0.0,  octave:4 },
+  sad:         { bpmMult:0.7,  velMin:0.3, velMax:0.55,swing:0.1,  octave:4 },
+  celebration: { bpmMult:1.2,  velMin:0.65,velMax:0.95,swing:0.05, octave:5 },
+  devotional:  { bpmMult:0.8,  velMin:0.4, velMax:0.65,swing:0.0,  octave:4 },
+  comedy:      { bpmMult:1.1,  velMin:0.5, velMax:0.85,swing:0.2,  octave:5 },
+  suspense:    { bpmMult:0.9,  velMin:0.3, velMax:0.6, swing:0.05, octave:3 },
+  folk:        { bpmMult:1.0,  velMin:0.6, velMax:0.9, swing:0.25, octave:4 },
+};
+
+const INSTRUMENT_CONFIG = {
+  veena:  { type:'triangle', attack:0.03, decay:0.4, sustain:0.5, release:1.5 },
+  flute:  { type:'sine',     attack:0.08, decay:0.2, sustain:0.7, release:0.8 },
+  sitar:  { type:'sawtooth', attack:0.01, decay:0.5, sustain:0.4, release:1.0 },
+  piano:  { type:'triangle', attack:0.01, decay:0.3, sustain:0.6, release:0.6 },
+  synth:  { type:'square',   attack:0.02, decay:0.1, sustain:0.8, release:0.4 },
+};
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let selectedMood = 'love';
+let generatedNotes = [];   // [{name, dur, vel, time}]
+let totalDur = 0;
+
+// Tone.js parts — single source of truth
+let synth = null;
+let part  = null;           // Tone.Part — the only scheduler
+let isPlaying = false;
+let vizAnimId = null;
+
+// ══════════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════════
+function pickMood(el) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedMood = el.dataset.mood;
+}
+
+function updateSpeed(v) {
+  document.getElementById('speedLabel').textContent = v + ' BPM';
+  const pct = ((v - 60) / 120) * 100;
+  document.getElementById('speedFill').style.width = pct + '%';
+}
+updateSpeed(100);
+
+function setDots(active) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('dot' + i);
+    d.className = 'step-dot' + (i < active ? ' done' : i === active ? ' active' : '');
+  }
+}
+
+function setStatus(msg, cls) {
+  const s = document.getElementById('statusBox');
+  s.textContent = msg;
+  s.className = 'status ' + (cls || '');
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60).toString().padStart(2,'0');
+  return m + ':' + ss;
+}
+
+// ══════════════════════════════════════════════════
+//  SIMPLE LSTM-INSPIRED GENERATOR
+// ══════════════════════════════════════════════════
+function generateSequence(scaleNotes, count, temperature) {
+  // Simple recurrent generator: each step influenced by previous note
+  const seq = [];
+  let prev = Math.floor(scaleNotes.length / 2); // start near middle
+  let momentum = 0; // direction tendency
+
+  for (let i = 0; i < count; i++) {
+    // "Hidden state" influenced by previous and momentum
+    momentum += (Math.random() - 0.5) * 2;
+    momentum *= 0.7; // decay
+
+    // Bias toward scale steps (±1, ±2 from prev)
+    const step = Math.round(momentum * temperature) + (Math.random() < 0.3 ? (Math.random() < 0.5 ? 0 : (Math.random()<0.5?1:-1)) : 0);
+    prev = Math.max(0, Math.min(scaleNotes.length - 1, prev + step));
+
+    seq.push(scaleNotes[prev]);
+  }
+  return seq;
+}
+
+// ══════════════════════════════════════════════════
+//  GENERATE MUSIC
+// ══════════════════════════════════════════════════
+async function generateMusic() {
+  // Always hard stop first
+  hardStop();
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  setDots(-1);
+
+  const raaga    = document.getElementById('raaga').value;
+  const instr    = document.getElementById('instrument').value;
+  const count    = parseInt(document.getElementById('length').value);
+  const baseBpm  = parseInt(document.getElementById('speedSlider').value);
+  const mood     = selectedMood;
+  const moodCfg  = MOOD_CONFIG[mood];
+  const instrCfg = INSTRUMENT_CONFIG[instr];
+  const bpm      = Math.round(baseBpm * moodCfg.bpmMult);
+
+  // Step 1: Build scale
+  setStatus('🎵 Building ' + raaga + ' scale...', 'busy');
+  setDots(0);
+  await sleep(400);
+
+  const intervals = RAAGA_INTERVALS[raaga];
+  const octStart  = moodCfg.octave;
+  const scaleNotes = [];
+  for (let oct = octStart - 1; oct <= octStart + 1; oct++) {
+    for (const interval of intervals) {
+      const midi = (oct + 1) * 12 + interval;
+      if (midi >= 36 && midi <= 84) {
+        scaleNotes.push(NOTE_NAMES[midi % 12] + Math.floor(midi / 12 - 1));
+      }
+    }
+  }
+
+  // Step 2: LSTM generate
+  setStatus('🤖 AI (LSTM) generating melody...', 'busy');
+  setDots(1);
+  await sleep(500);
+
+  const temperature = 1.0 + (moodCfg.swing * 2);
+  const rawSeq = generateSequence(scaleNotes, count, temperature);
+
+  // Step 3: Build note events with rhythm
+  setStatus('🎼 Arranging rhythm and dynamics...', 'busy');
+  setDots(2);
+  await sleep(400);
+
+  const beatSec = 60 / bpm;
+  // Rhythm patterns per mood
+  const rhythms = {
+    love:        [1.0, 0.75, 1.25, 1.0],
+    action:      [0.5, 0.5, 0.5, 0.5],
+    sad:         [1.5, 1.0, 2.0, 1.0],
+    celebration: [0.5, 0.25, 0.25, 0.5, 0.5],
+    devotional:  [1.0, 1.0, 2.0],
+    comedy:      [0.25, 0.25, 0.5, 0.25, 0.75],
+    suspense:    [2.0, 0.5, 1.0, 1.5],
+    folk:        [0.5, 0.25, 0.25, 0.5, 0.5],
+  };
+  const rPat = rhythms[mood];
+
+  generatedNotes = [];
+  let t = 0;
+  rawSeq.forEach((noteName, i) => {
+    const durBeats = rPat[i % rPat.length];
+    const dur = durBeats * beatSec;
+    // Swing offset
+    const swingOffset = (i % 2 === 1) ? moodCfg.swing * beatSec * 0.5 : 0;
+    const vel = moodCfg.velMin + Math.random() * (moodCfg.velMax - moodCfg.velMin);
+    generatedNotes.push({ name: noteName, time: t + swingOffset, dur, vel });
+    t += dur;
+  });
+  totalDur = t;
+
+  // Step 4: Ready
+  setDots(3);
+  setStatus('✅ Music ready! Press ▶ to listen 🎶', 'ok');
+  await sleep(200);
+
+  // Setup synth
+  await Tone.start();
+  if (synth) { synth.dispose(); synth = null; }
+
+  const reverb = new Tone.Reverb({ decay: mood === 'suspense' ? 3 : 1.5, wet: mood === 'ambient' ? 0.5 : 0.25 }).toDestination();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: instrCfg.type },
+    envelope: {
+      attack:  instrCfg.attack,
+      decay:   instrCfg.decay,
+      sustain: instrCfg.sustain,
+      release: instrCfg.release,
+    }
+  }).connect(reverb);
+  synth.volume.value = -6;
+
+  // Enable buttons
+  document.getElementById('playBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = false;
+  document.getElementById('notesCard').style.display = '';
+  document.getElementById('dlCard').style.display = '';
+
+  // Render note chips
+  const row = document.getElementById('notesRow');
+  row.innerHTML = '';
+  generatedNotes.forEach((n, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'note-chip';
+    chip.id = 'chip' + i;
+    chip.textContent = n.name;
+    row.appendChild(chip);
+  });
+
+  document.getElementById('timeTotal').textContent = fmtTime(totalDur);
+
+  btn.disabled = false;
+  btn.textContent = '🎵 Generate Again';
+}
+
+// ══════════════════════════════════════════════════
+//  PLAY / PAUSE
+// ══════════════════════════════════════════════════
+async function togglePlay() {
+  if (generatedNotes.length === 0) return;
+  if (isPlaying) {
+    pauseMusic();
+  } else {
+    await playMusic();
+  }
+}
+
+async function playMusic() {
+  await Tone.start();
+  if (!synth) return;
+
+  isPlaying = true;
+  document.getElementById('playBtn').textContent = '⏸';
+  setStatus('▶ Playing...', 'play');
+
+  // Dispose old part if any
+  if (part) { part.dispose(); part = null; }
+
+  // Build Tone.Part events
+  const events = generatedNotes.map(n => [n.time, n]);
+
+  part = new Tone.Part((time, note) => {
+    synth.triggerAttackRelease(note.name, note.dur, time, note.vel);
+  }, events);
+
+  part.start(0);
+
+  // Reset transport position and start
+  Tone.Transport.stop();
+  Tone.Transport.position = 0;
+  Tone.Transport.start('+0.05');
+
+  // When done, auto-stop
+  const endTime = totalDur + 0.5;
+  Tone.Transport.scheduleOnce(() => {
+    hardStop();
+  }, endTime);
+
+  startViz();
+  startProgressUpdate();
+}
+
+function pauseMusic() {
+  isPlaying = false;
+  Tone.Transport.pause();
+  synth.releaseAll();
+  document.getElementById('playBtn').textContent = '▶';
+  setStatus('⏸ Paused', '');
+  stopViz();
+  cancelProgressUpdate();
+}
+
+// HARD STOP — always works, no exceptions
+function hardStop() {
+  isPlaying = false;
+
+  // Kill transport
+  Tone.Transport.stop();
+  Tone.Transport.cancel(); // cancel all scheduled events on transport
+
+  // Kill part
+  if (part) {
+    try { part.stop(); part.dispose(); } catch(e) {}
+    part = null;
+  }
+
+  // Kill synth sound immediately
+  if (synth) {
+    try { synth.releaseAll(Tone.now()); } catch(e) {}
+  }
+
+  // Reset UI
+  document.getElementById('playBtn').textContent = '▶';
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('timeNow').textContent = '0:00';
+
+  stopViz();
+  cancelProgressUpdate();
+
+  if (generatedNotes.length > 0) {
+    setStatus('⏹ Stopped', '');
+  }
+
+  // Un-highlight all chips
+  document.querySelectorAll('.note-chip').forEach(c => c.classList.remove('lit'));
+}
+
+// ══════════════════════════════════════════════════
+//  SEEK
+// ══════════════════════════════════════════════════
+function seekProgress(e) {
+  if (!generatedNotes.length) return;
+  const pct = e.offsetX / e.currentTarget.offsetWidth;
+  const seekSec = pct * totalDur;
+
+  if (isPlaying) {
+    Tone.Transport.seconds = seekSec;
+  } else {
+    document.getElementById('progFill').style.width = (pct * 100) + '%';
+    document.getElementById('timeNow').textContent = fmtTime(seekSec);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  PROGRESS & NOTE HIGHLIGHTING
+// ══════════════════════════════════════════════════
+let progTimerId = null;
+
+function startProgressUpdate() {
+  cancelProgressUpdate();
+  progTimerId = setInterval(() => {
+    if (!isPlaying) return;
+    const pos = Tone.Transport.seconds;
+    const pct = Math.min(100, (pos / totalDur) * 100);
+    document.getElementById('progFill').style.width = pct + '%';
+    document.getElementById('timeNow').textContent = fmtTime(pos);
+
+    // Highlight current note
+    let cur = -1;
+    for (let i = 0; i < generatedNotes.length; i++) {
+      if (generatedNotes[i].time <= pos) cur = i;
+    }
+    document.querySelectorAll('.note-chip').forEach((c, i) => {
+      c.classList.toggle('lit', i === cur);
+    });
+  }, 100);
+}
+
+function cancelProgressUpdate() {
+  clearInterval(progTimerId);
+  progTimerId = null;
+}
+
+// ══════════════════════════════════════════════════
+//  WAVEFORM VISUALIZER
+// ══════════════════════════════════════════════════
+let vizPhase = 0;
+
+function startViz() {
+  stopViz();
+  const canvas = document.getElementById('vizCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function frame() {
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+
+    vizPhase += 0.06;
+    const mood = selectedMood;
+    const colors = {
+      love:'#ff6b9d', action:'#ff4444', sad:'#6495ed',
+      celebration:'#ffd700', devotional:'#ff8c00',
+      comedy:'#7fff00', suspense:'#9370db', folk:'#ff8c00',
+    };
+    const col = colors[mood] || '#ff8c00';
+
+    // 3 waves
+    for (let layer = 0; layer < 3; layer++) {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x++) {
+        const amp = (12 + layer * 8) * (0.7 + 0.3 * Math.sin(vizPhase * 0.4));
+        const y = H/2
+          + Math.sin(x * 0.015 + vizPhase + layer * 1.2) * amp
+          + Math.sin(x * 0.035 + vizPhase * 1.5) * amp * 0.4;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = col + Math.floor((0.6 - layer * 0.15) * 255).toString(16).padStart(2,'0');
+      ctx.lineWidth = 2.5 - layer * 0.5;
+      ctx.stroke();
+    }
+
+    vizAnimId = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function stopViz() {
+  cancelAnimationFrame(vizAnimId);
+  // Draw flat line
+  const canvas = document.getElementById('vizCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600;
+  const H = canvas.offsetHeight || 90;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+  ctx.beginPath();
+  ctx.moveTo(0, H/2); ctx.lineTo(W, H/2);
+  ctx.strokeStyle = 'rgba(255,140,0,0.2)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+// ══════════════════════════════════════════════════
+//  MIDI EXPORT
+// ══════════════════════════════════════════════════
+function downloadMIDI() {
+  if (!generatedNotes.length) return;
+  const bpm = parseInt(document.getElementById('speedSlider').value);
+  const uspb = Math.round(60000000 / bpm);
+  const tpb  = 480;
+  const bytes = [];
+  const ub = v => bytes.push(v & 0xff);
+  const u16 = v => { bytes.push((v>>8)&0xff); bytes.push(v&0xff); };
+  const u32 = v => { for(let s=24;s>=0;s-=8) bytes.push((v>>s)&0xff); };
+
+  // Header
+  [0x4d,0x54,0x68,0x64].forEach(b=>bytes.push(b));
+  u32(6); u16(0); u16(1); u16(tpb);
+
+  const track = [];
+  const tv = v => {
+    let buf=[v&0x7f]; v>>=7;
+    while(v>0){buf.unshift((v&0x7f)|0x80);v>>=7;}
+    buf.forEach(b=>track.push(b));
+  };
+  const tb = v => track.push(v&0xff);
+
+  // Tempo
+  tv(0); tb(0xff); tb(0x51); tb(3);
+  tb((uspb>>16)&0xff); tb((uspb>>8)&0xff); tb(uspb&0xff);
+
+  // Note events
+  const evts = [];
+  generatedNotes.forEach(n => {
+    const midi = noteNameToMidi(n.name);
+    if (midi < 0) return;
+    const st = Math.round((n.time / (60/bpm)) * tpb);
+    const et = Math.round(((n.time + n.dur * 0.9) / (60/bpm)) * tpb);
+    const vel = Math.min(127, Math.round(n.vel * 127));
+    evts.push({tick:st, type:0x90, note:midi, vel});
+    evts.push({tick:et, type:0x80, note:midi, vel:0});
+  });
+  evts.sort((a,b)=>a.tick-b.tick);
+
+  let last = 0;
+  evts.forEach(e => {
+    tv(e.tick - last); last = e.tick;
+    tb(e.type); tb(e.note); tb(e.vel);
+  });
+  tv(0); tb(0xff); tb(0x2f); tv(0);
+
+  // Track chunk
+  [0x4d,0x54,0x72,0x6b].forEach(b=>bytes.push(b));
+  u32(track.length);
+  track.forEach(b=>bytes.push(b));
+
+  const blob = new Blob([new Uint8Array(bytes)], {type:'audio/midi'});
+  saveBlob(blob, 'tollywood_music.mid');
+}
+
+function noteNameToMidi(name) {
+  const match = name.match(/^([A-G]#?)(-?\d+)$/);
+  if (!match) return -1;
+  const ni = NOTE_NAMES.indexOf(match[1]);
+  const oct = parseInt(match[2]);
+  return (oct + 1) * 12 + ni;
+}
+
+// ══════════════════════════════════════════════════
+//  WAV EXPORT
+// ══════════════════════════════════════════════════
+async function downloadWAV() {
+  if (!generatedNotes.length) return;
+  const wavBtn = document.getElementById('wavBtn');
+  wavBtn.disabled = true;
+  wavBtn.textContent = '⏳ Rendering...';
+  setStatus('🎙️ Rendering WAV (this takes a moment)...', 'busy');
+
+  try {
+    const instr = document.getElementById('instrument').value;
+    const cfg   = INSTRUMENT_CONFIG[instr];
+    const dur   = totalDur + 2;
+
+    const buffer = await Tone.Offline(() => {
+      const rev = new Tone.Reverb({decay:1.5, wet:0.2}).toDestination();
+      const s = new Tone.PolySynth(Tone.Synth, {
+        oscillator:{type:cfg.type},
+        envelope:{attack:cfg.attack,decay:cfg.decay,sustain:cfg.sustain,release:cfg.release}
+      }).connect(rev);
+      s.volume.value = -6;
+      generatedNotes.forEach(n => {
+        s.triggerAttackRelease(n.name, n.dur, n.time + 0.1, n.vel);
+      });
+    }, dur);
+
+    const wav = audioBufferToWav(buffer);
+    saveBlob(new Blob([wav], {type:'audio/wav'}), 'tollywood_music.wav');
+    setStatus('✅ WAV saved! Check your Downloads folder.', 'ok');
+  } catch(e) {
+    setStatus('❌ WAV export failed: ' + e.message, '');
+  }
+
+  wavBtn.disabled = false;
+  wavBtn.textContent = '⬇️ Download WAV';
+}
+
+function audioBufferToWav(buf) {
+  const ch = buf.numberOfChannels;
+  const sr = buf.sampleRate;
+  const len = buf.length;
+  const ab = new ArrayBuffer(44 + len * ch * 2);
+  const v = new DataView(ab);
+  const ws = (o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  ws(0,'RIFF'); v.setUint32(4,36+len*ch*2,true);
+  ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,ch,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*ch*2,true);
+  v.setUint16(32,ch*2,true); v.setUint16(34,16,true);
+  ws(36,'data'); v.setUint32(40,len*ch*2,true);
+  let off=44;
+  const chans = Array.from({length:ch},(_,c)=>buf.getChannelData(c));
+  for(let i=0;i<len;i++) for(let c=0;c<ch;c++){
+    const s=Math.max(-1,Math.min(1,chans[c][i]));
+    v.setInt16(off,s<0?s*0x8000:s*0x7fff,true); off+=2;
+  }
+  return ab;
+}
+
+function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Init visualizer on load
+window.addEventListener('load', stopViz);
+</script>
+</body>
+</html>
