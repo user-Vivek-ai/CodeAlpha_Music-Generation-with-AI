@@ -2,6 +2,8 @@
 
 An AI-powered music generator that creates Telugu film-style melodies using Indian raagas and mood-based composition. Built with HTML, JavaScript, Tone.js, and the Web Audio API.
 
+# Live Demo Link : https://user-vivek-ai.github.io/CodeAlpha_Music-Generation-with-AI/
+
 ## ✨ Features
 
 * AI-generated melodies
